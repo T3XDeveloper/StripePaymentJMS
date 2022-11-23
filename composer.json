@@ -1,0 +1,24 @@
+{
+    "name": "t3xdeveloper/stripe-payment-jms",
+    "type": "symfony-bundle",
+    "description": "Stripe Payment Provider Package based and developed on JMSPaymentCoreBundle. Allow access to Stripe API by symfony framework.",
+    "keywords": ["payment", "stripe", "symfony", "ibexa", "ecommerce"],
+    "homepage": "https://github.com/T3XDeveloper/StripePaymentJMS",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Patrick Wiermann",
+            "email": "patrick@t3x-developer.de"
+        }
+    ],
+    "require": {
+        "php": "^7.4|^8.0",
+        "symfony/framework-bundle": "~4.0|^5.0",
+        "jms/payment-core-bundle": "~1.0",
+        "omnipay/stripe": "~2.0",
+        "psr/log": "~1.0"
+    },
+	"autoload": {
+        "psr-4": { "OMX\\Ecommerce\\StripePackage\\": "src" }
+    }
+}

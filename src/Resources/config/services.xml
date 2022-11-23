@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="ommax_ecommerce_stripe.gateway.class">Omnipay\Stripe\Gateway</parameter>
+        <parameter key="ommax_ecommerce_stripe.forms.stripe_type.class">OMX\Ecommerce\StripePackage\Forms\StripeType</parameter>
+        <parameter key="ommax_ecommerce_stripe.forms.checkout_type.class">OMX\Ecommerce\StripePackage\Forms\CheckoutType</parameter>
+        <parameter key="ommax_ecommerce_stripe.plugins.checkout.class">OMX\Ecommerce\StripePackage\Plugins\CheckoutPlugin</parameter>
+        <parameter key="ommax_ecommerce_stripe.api_key" />
+    </parameters>
+
+    <services>
+        <service id="ommax_ecommerce_stripe.gateway" class="%ommax_ecommerce_stripe.gateway.class%">
+            <argument>null</argument>
+            <argument type="service" id="request" on-invalid="null" strict="false" />
+            <call method="setApiKey">
+                <argument>%ommax_ecommerce_stripe.api_key%</argument>
+            </call>
+        </service>
+
+        <service id="ommax_ecommerce_stripe.plugins.checkout" class="%ommax_ecommerce_stripe.plugins.checkout.class%">
+            <argument type="service" id="ommax_ecommerce_stripe.gateway" />
+            <call method="setLogger">
+                <argument type="service" id="monolog.logger.ommax_ecommerce_stripe" />
+            </call>
+            <tag name="payment.plugin" />
+        </service>
+
+        <service id="monolog.logger.ommax_ecommerce_stripe" parent="monolog.logger_prototype">
+            <argument index="0">ommax_ecommerce_stripe</argument>
+        </service>
+    </services>
+</container>

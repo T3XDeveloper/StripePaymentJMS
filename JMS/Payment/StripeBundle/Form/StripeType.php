@@ -1,5 +1,5 @@
 <?php
-namespace OMX\Ecommerce\StripePackage\Form;
+namespace JMS\Payment\StripeBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
 

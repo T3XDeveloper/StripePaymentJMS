@@ -1,5 +1,5 @@
 <?php
-namespace OMX\Ecommerce\StripePackage\DependencyInjection;
+namespace JMS\Payment\StripeBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;

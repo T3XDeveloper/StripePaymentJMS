@@ -36,7 +36,7 @@ class CheckoutPlugin extends AbstractPlugin
 
     public function processes($name)
     {
-        return $name == 'stripe_checkout';
+        return $name == 'stripe_express_checkout';
     }
 
     public function approveAndDeposit(FinancialTransactionInterface $transaction, $retry)

@@ -5,9 +5,6 @@
     "keywords": ["payment", "stripe", "symfony", "ibexa", "ecommerce"],
     "homepage": "https://github.com/T3XDeveloper/StripePaymentJMS",
     "license": "MIT",
-    "replace": {
-        "t3xdeveloper/stripe-payment-jms": "self.version"
-    },
     "authors": [
         {
             "name": "Patrick Wiermann",
@@ -21,8 +18,6 @@
         "psr/log": "^1|^2|^3"
     },
 	"autoload": {
-        "psr-0": {
-            "OMX\\Ecommerce\\StripePackage": ""
-        }
+        "psr-4": { "OMX\\Ecommerce\\StripePackage\\": "" }
     }
 }

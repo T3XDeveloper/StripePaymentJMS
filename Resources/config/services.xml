@@ -6,9 +6,9 @@
 
     <parameters>
         <parameter key="ommax_ecommerce_stripe.gateway.class">Omnipay\Stripe\Gateway</parameter>
-        <parameter key="ommax_ecommerce_stripe.forms.stripe_type.class">OMX\Ecommerce\StripePackage\Forms\StripeType</parameter>
-        <parameter key="ommax_ecommerce_stripe.forms.checkout_type.class">OMX\Ecommerce\StripePackage\Forms\CheckoutType</parameter>
-        <parameter key="ommax_ecommerce_stripe.plugins.checkout.class">OMX\Ecommerce\StripePackage\Plugins\CheckoutPlugin</parameter>
+        <parameter key="ommax_ecommerce_stripe.forms.stripe_type.class">OMX\Ecommerce\StripePackage\Form\StripeType</parameter>
+        <parameter key="ommax_ecommerce_stripe.forms.checkout_type.class">OMX\Ecommerce\StripePackage\Form\CheckoutType</parameter>
+        <parameter key="ommax_ecommerce_stripe.plugins.checkout.class">OMX\Ecommerce\StripePackage\Plugin\CheckoutPlugin</parameter>
         <parameter key="ommax_ecommerce_stripe.api_key" />
     </parameters>
 

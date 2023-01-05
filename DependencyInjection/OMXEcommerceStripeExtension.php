@@ -6,6 +6,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+use Symfony\Component\Yaml\Yaml;
 
 /*
  * Copyright 2022 Patrick Wiermann <patrick@t3x-developer.de>
@@ -13,6 +14,12 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 class OMXEcommerceStripeExtension extends Extension
 {
+    public function prepend(ContainerBuilder $container)
+    {
+        $config = Yaml::parse(file_get_contents(__DIR__ . '/../Resources/config/jms_payment_stripe.yml'));
+        $container->prependExtensionConfig('jms_payment_stripe', $config);
+    }
+
     public function load(array $configs, ContainerBuilder $container)
     {
         $configuration = new Configuration($this->getAlias());

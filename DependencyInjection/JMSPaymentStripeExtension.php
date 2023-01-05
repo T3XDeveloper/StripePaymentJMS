@@ -13,7 +13,7 @@ use Symfony\Component\Yaml\Yaml;
  * Copyright 2022 Patrick Wiermann <patrick@t3x-developer.de>
  */
 
-class OMXEcommerceStripeExtension extends Extension
+class JMSPaymentStripeExtension extends Extension
 {
     public function prepend(ContainerBuilder $container)
     {

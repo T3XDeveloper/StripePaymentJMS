@@ -10,7 +10,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {
-    private $alias = 'ommax_ecommerce_stripe';
+    private $alias;
 
     public function __construct($alias)
     {
@@ -19,36 +19,15 @@ class Configuration implements ConfigurationInterface
 
     public function getConfigTreeBuilder()
     {
-        $builder = new TreeBuilder();
-        $rootNode = $builder->root($this->alias);
+        $tb = new TreeBuilder($this->alias, 'array');
 
-        $methods = ['checkout'];
+        $tb
+            ->getRootNode()
+                ->children()
+                    ->scalarNode('api_key')->defaultNull()->end()
+                    ->booleanNode('debug')->defaultValue('%kernel.debug%')->end()
+                ->end();
 
-        $rootNode
-            ->children()
-                ->scalarNode('api_key')
-                    ->isRequired()
-                    ->cannotBeEmpty()
-                ->end()
-                ->booleanNode('logger')
-                    ->defaultTrue()
-                ->end()
-            ->end()
-
-            ->fixXmlConfig('method')
-            ->children()
-                ->arrayNode('methods')
-                    ->defaultValue($methods)
-                    ->prototype('scalar')
-                        ->validate()
-                            ->ifNotInArray($methods)
-                            ->thenInvalid('%s is not a valid method.')
-                        ->end()
-                    ->end()
-                ->end()
-            ->end()
-        ;
-
-        return $builder;
+        return $tb;
     }
 }

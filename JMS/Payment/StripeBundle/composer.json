@@ -19,8 +19,8 @@
     },
 	"autoload": {
         "psr-0": {
-            "OMX\\Ecommerce\\StripePackage": ""
+            "JMS\\Payment\\StripeBundle": ""
         }
     },
-    "target-dir": ""
+    "target-dir": "JMS/Payment/StripeBundle"
 }

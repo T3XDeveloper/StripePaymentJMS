@@ -1,6 +1,6 @@
 <?php
 
-namespace OMX\Ecommerce\StripePackage\Plugin;
+namespace JMS\Payment\StripeBundle\Plugin;
 
 use JMS\Payment\CoreBundle\Model\FinancialTransactionInterface;
 use JMS\Payment\CoreBundle\Plugin\AbstractPlugin;

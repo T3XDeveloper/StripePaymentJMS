@@ -18,6 +18,9 @@
         "psr/log": "^1|^2|^3"
     },
 	"autoload": {
-        "psr-4": { "OMX\\Ecommerce\\StripePackage\\": "" }
-    }
+        "psr-0": {
+            "OMX\\Ecommerce\\StripePackage": ""
+        }
+    },
+    "target-dir": ""
 }

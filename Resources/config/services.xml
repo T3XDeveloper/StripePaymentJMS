@@ -5,12 +5,12 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-        <parameter key="payment.plugin.stripe_express_checkout.class">JMS\Payment\StripeBundle\Plugin\CheckoutPlugin</parameter>
+        <parameter key="payment.plugin.stripe_express_checkout.class">JMS\Payment\StripeBundle\Plugin\ExpressCheckoutPlugin</parameter>
         <parameter key="payment.stripe.api_key" />
 
         <parameter key="payment.stripe.gateway.class">Omnipay\Stripe\Gateway</parameter>
-        <parameter key="payment.form.stripe_express_stripe_type.class">JMS\Payment\StripeBundle\Form\StripeType</parameter>
-        <parameter key="payment.form.stripe_express_checkout_type.class">JMS\Payment\StripeBundle\Form\CheckoutType</parameter>
+        <parameter key="payment.form.stripe_express_stripe_type.class">JMS\Payment\StripeBundle\Form\ExpressStripeType</parameter>
+        <parameter key="payment.form.stripe_express_checkout_type.class">JMS\Payment\StripeBundle\Form\ExpressCheckoutType</parameter>
     </parameters>
 
     <services>
@@ -21,15 +21,10 @@
                 <argument>%payment.stripe.api_key%</argument>
             </call>
         </service>
-        <service id="payment.plugin.stripe_express_checkout" class="%payment.plugin.stripe_express_checkout.class%">
+        <service id="payment.plugin.stripe_express_checkout" alias="JMS\Payment\StripeBundle\Plugin\ExpressCheckoutPlugin"/>
+        <service id="JMS\Payment\StripeBundle\Plugin\ExpressCheckoutPlugin" class="%payment.plugin.stripe_express_checkout.class%">
             <argument type="service" id="payment.stripe.gateway" />
-            <call method="setLogger">
-                <argument type="service" id="monolog.logger.stripe_express_checkout" />
-            </call>
             <tag name="payment.plugin" />
-        </service>
-        <service id="monolog.logger.stripe_express_checkout" parent="monolog.logger_prototype">
-            <argument index="0">stripe_express_checkout</argument>
         </service>
         <service id="payment.form.stripe_express_checkout_type" class="%payment.form.stripe_express_checkout_type.class%">
             <tag name="payment.method_form_type" />

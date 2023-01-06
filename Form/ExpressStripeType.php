@@ -3,7 +3,7 @@ namespace JMS\Payment\StripeBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
 
-class StripeType extends AbstractType
+class ExpressStripeType extends AbstractType
 {
     /**
      * @var string

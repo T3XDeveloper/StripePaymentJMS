@@ -4,7 +4,7 @@ namespace JMS\Payment\StripeBundle\Form;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
-class CheckoutType extends StripeType
+class ExpressCheckoutType extends ExpressStripeType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {

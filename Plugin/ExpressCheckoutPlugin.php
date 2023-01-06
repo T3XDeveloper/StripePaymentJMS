@@ -12,31 +12,26 @@ use JMS\Payment\CoreBundle\Plugin\Exception\PaymentPendingException;
 use JMS\Payment\CoreBundle\Plugin\PluginInterface;
 use JMS\Payment\CoreBundle\Util\Number;
 use Omnipay\Stripe\Gateway;
-use Psr\Log\LoggerInterface;
 
 class ExpressCheckoutPlugin extends AbstractPlugin
 {
+    /**
+     * @var string
+     */
+    protected $apiKey;
+
     /**
      * @var \Omnipay\Stripe\Gateway
      */
     protected $gateway;
 
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    protected $logger;
-
-    public function __construct(Gateway $gateway)
+    public function __construct(
+        $apiKey,
+        Gateway $gateway
+    )
     {
+        $this->apiKey = $apiKey;
         $this->gateway = $gateway;
-    }
-
-    /**
-     * @param LoggerInterface $logger
-     */
-    public function setLogger(LoggerInterface $logger = null)
-    {
-        $this->logger = $logger;
     }
 
     public function processes($paymentSystemName)
@@ -121,9 +116,20 @@ class ExpressCheckoutPlugin extends AbstractPlugin
         $parameters = [
             'amount'      => $transaction->getRequestedAmount(),
             'currency'    => $transaction->getPayment()->getPaymentInstruction()->getCurrency(),
-            'token'       => $data->get('token'),
+            'token'       => $this->getApiKey($data),
         ];
 
         return $parameters;
+    }
+
+    protected function getApiKey(ExtendedDataInterface $data)
+    {
+        if ($data->has('api_key')) {
+            return $data->get('api_key');
+        } elseif (!empty($this->apiKey)) {
+            return $this->apiKey;
+        }
+
+        throw new \RuntimeException('You must configure a API Public Key.');
     }
 }

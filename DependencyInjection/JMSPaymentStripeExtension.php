@@ -34,6 +34,8 @@ class JMSPaymentStripeExtension extends Extension
         $xmlLoader->load('services.xml');
 
         $container->setParameter('payment.stripe.api_key', $config['api_key']);
+        $container->setParameter('payment.stripe.logger', $config['logger']);
+        $container->setParameter('payment.stripe.methods', $config['methods']);
         $container->setParameter('payment.stripe.debug', $config['debug']);
     }
 

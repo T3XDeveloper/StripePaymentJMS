@@ -19,9 +19,6 @@ class JMSPaymentStripeExtension extends Extension
     {
         $config = Yaml::parse(file_get_contents(__DIR__ . '/../Resources/config/jms_payment_stripe.yml'));
         $container->prependExtensionConfig('jms_payment_stripe', $config);
-
-        $this->prependJMSTranslation($container);
-        $this->prependBazingaJsTranslationConfiguration($container);
     }
 
     public function load(array $configs, ContainerBuilder $container)

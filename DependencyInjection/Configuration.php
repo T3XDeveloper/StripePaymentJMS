@@ -25,6 +25,10 @@ class Configuration implements ConfigurationInterface
             ->getRootNode()
                 ->children()
                     ->scalarNode('api_key')->defaultNull()->end()
+                    ->booleanNode('logger')->defaultValue('true')->end()
+                    ->arrayNode('methods')
+                        ->scalarPrototype()->end()
+                    ->end()
                     ->booleanNode('debug')->defaultValue('%kernel.debug%')->end()
                 ->end();
 

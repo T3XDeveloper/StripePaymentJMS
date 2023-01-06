@@ -16,7 +16,7 @@
     <services>
         <service id="payment.stripe.gateway" class="%payment.stripe.gateway.class%">
             <argument>null</argument>
-            <argument type="service" id="request" on-invalid="null" strict="false" />
+            <argument type="service" id="request" on-invalid="null" />
             <call method="setApiKey">
                 <argument>%payment.stripe.api_key%</argument>
             </call>

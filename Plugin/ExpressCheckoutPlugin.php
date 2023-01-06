@@ -25,107 +25,59 @@ class ExpressCheckoutPlugin extends AbstractPlugin
         $this->gateway = $gateway;
     }
 
-    public function processes($paymentSystemName)
-    {
-        return $paymentSystemName === 'stripe_express_checkout';
-    }
-
     public function approve(FinancialTransactionInterface $transaction, $retry)
     {
-        $this->createCheckoutBillingAgreement($transaction, $retry);
+        $this->createCheckoutBillingAgreement($transaction, 'Authorization');
     }
 
     public function approveAndDeposit(FinancialTransactionInterface $transaction, $retry)
     {
-        $this->createCheckoutBillingAgreement($transaction, $retry);
+        $this->createCheckoutBillingAgreement($transaction, 'Sale');
     }
 
-    protected function createCheckoutBillingAgreement(FinancialTransactionInterface $transaction, $retry)
+    public function credit(FinancialTransactionInterface $transaction, $retry)
     {
-        $parameters = $this->getPurchaseParameters($transaction);
-        $response = $this->gateway->purchase($parameters)->send();
-
-        if($response->isSuccessful()) {
-            $transaction->setReferenceNumber($response->getTransactionReference());
-
-            $data = $response->getData();
-
-            $transaction->setProcessedAmount($data['amount'] / 100);
-            $transaction->setResponseCode(PluginInterface::RESPONSE_CODE_SUCCESS);
-            $transaction->setReasonCode(PluginInterface::REASON_CODE_SUCCESS);
-
-            return;
-        }
-
-        $data = $response->getData();
-        switch($data['error']['type']) {
-            case "api_error":
-                $ex = new FinancialException($response->getMessage());
-                $ex->addProperty('error', $data['error']);
-                $ex->setFinancialTransaction($transaction);
-
-                $transaction->setResponseCode('FAILED');
-                $transaction->setReasonCode($response->getMessage());
-                $transaction->setState(FinancialTransactionInterface::STATE_FAILED);
-
-                break;
-
-            case "card_error":
-                $ex = new FinancialException($response->getMessage());
-                $ex->addProperty('error', $data['error']);
-                $ex->setFinancialTransaction($transaction);
-
-                $transaction->setResponseCode('FAILED');
-                $transaction->setReasonCode($response->getMessage());
-                $transaction->setState(FinancialTransactionInterface::STATE_FAILED);
-
-                break;
-
-            default:
-                $ex = new FinancialException($response->getMessage());
-                $ex->addProperty('error', $data['error']);
-                $ex->setFinancialTransaction($transaction);
-
-                $transaction->setResponseCode('FAILED');
-                $transaction->setReasonCode($response->getMessage());
-                $transaction->setState(FinancialTransactionInterface::STATE_FAILED);
-
-                break;
-        }
-
-        throw $ex;
-    }
-
-    /**
-     * @param FinancialTransactionInterface $transaction
-     * @return array
-     */
-    protected function getPurchaseParameters(FinancialTransactionInterface $transaction)
-    {
-        /**
-         * @var \JMS\Payment\CoreBundle\Model\PaymentInterface $payment
-         */
-        $payment = $transaction->getPayment();
-
-        /**
-         * @var \JMS\Payment\CoreBundle\Model\PaymentInstructionInterface $paymentInstruction
-         */
-        $paymentInstruction = $payment->getPaymentInstruction();
-
-        /**
-         * @var \JMS\Payment\CoreBundle\Model\ExtendedDataInterface $data
-         */
         $data = $transaction->getExtendedData();
+        $approveTransaction = $transaction->getCredit()->getPayment()->getApproveTransaction();
 
-        $transaction->setTrackingId($payment->getId());
+        $parameters = [];
+        if (Number::compare($transaction->getRequestedAmount(), $approveTransaction->getProcessedAmount()) !== 0) {
+            $parameters['REFUNDTYPE'] = 'Partial';
+            $parameters['AMT'] = $this->client->convertAmountToPaypalFormat($transaction->getRequestedAmount());
+            $parameters['CURRENCYCODE'] = $transaction->getCredit()->getPaymentInstruction()->getCurrency();
+        }
+    }
 
-        $parameters = array(
-            'amount'      => $payment->getTargetAmount(),
-            'currency'    => $paymentInstruction->getCurrency(),
-            'description' => ($data->get('description') ? $data->get('description') : 'not set'),
-            'token'       => $data->get('token'),
-        );
+    public function deposit(FinancialTransactionInterface $transaction, $retry)
+    {
+        $data = $transaction->getExtendedData();
+        $authorizationId = $transaction->getPayment()->getApproveTransaction()->getReferenceNumber();
 
-        return $parameters;
+        if (Number::compare($transaction->getPayment()->getApprovedAmount(), $transaction->getRequestedAmount()) === 0) {
+            $completeType = 'Complete';
+        } else {
+            $completeType = 'NotComplete';
+        }
+    }
+
+    public function reverseApproval(FinancialTransactionInterface $transaction, $retry)
+    {
+        $data = $transaction->getExtendedData();
+    }
+
+    public function processes($paymentSystemName)
+    {
+        return 'stripe_express_checkout' === $paymentSystemName;
+    }
+
+    public function isIndependentCreditSupported()
+    {
+        return false;
+    }
+
+    protected function createCheckoutBillingAgreement(FinancialTransactionInterface $transaction, $paymentAction)
+    {
+        $data = $transaction->getExtendedData();
+        die(var_dump($data));
     }
 }

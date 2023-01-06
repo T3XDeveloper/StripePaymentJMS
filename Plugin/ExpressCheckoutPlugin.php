@@ -16,21 +16,12 @@ use Omnipay\Stripe\Gateway;
 class ExpressCheckoutPlugin extends AbstractPlugin
 {
     /**
-     * @var string
-     */
-    protected $apiKey;
-
-    /**
      * @var \Omnipay\Stripe\Gateway
      */
     protected $gateway;
 
-    public function __construct(
-        $apiKey,
-        Gateway $gateway
-    )
+    public function __construct(Gateway $gateway)
     {
-        $this->apiKey = $apiKey;
         $this->gateway = $gateway;
     }
 
@@ -111,25 +102,30 @@ class ExpressCheckoutPlugin extends AbstractPlugin
      */
     protected function getPurchaseParameters(FinancialTransactionInterface $transaction)
     {
+        /**
+         * @var \JMS\Payment\CoreBundle\Model\PaymentInterface $payment
+         */
+        $payment = $transaction->getPayment();
+
+        /**
+         * @var \JMS\Payment\CoreBundle\Model\PaymentInstructionInterface $paymentInstruction
+         */
+        $paymentInstruction = $payment->getPaymentInstruction();
+
+        /**
+         * @var \JMS\Payment\CoreBundle\Model\ExtendedDataInterface $data
+         */
         $data = $transaction->getExtendedData();
 
-        $parameters = [
-            'amount'      => $transaction->getRequestedAmount(),
-            'currency'    => $transaction->getPayment()->getPaymentInstruction()->getCurrency(),
-            'token'       => $this->getApiKey($data),
-        ];
+        $transaction->setTrackingId($payment->getId());
+
+        $parameters = array(
+            'amount'      => $payment->getTargetAmount(),
+            'currency'    => $paymentInstruction->getCurrency(),
+            'description' => ($data->get('description') ? $data->get('description') : 'not set'),
+            'token'       => $data->get('token'),
+        );
 
         return $parameters;
-    }
-
-    protected function getApiKey(ExtendedDataInterface $data)
-    {
-        if ($data->has('api_key')) {
-            return $data->get('api_key');
-        } elseif (!empty($this->apiKey)) {
-            return $this->apiKey;
-        }
-
-        throw new \RuntimeException('You must configure a API Public Key.');
     }
 }

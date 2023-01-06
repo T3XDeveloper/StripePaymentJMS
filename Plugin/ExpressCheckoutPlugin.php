@@ -2,10 +2,15 @@
 
 namespace JMS\Payment\StripeBundle\Plugin;
 
+use JMS\Payment\CoreBundle\Model\ExtendedDataInterface;
 use JMS\Payment\CoreBundle\Model\FinancialTransactionInterface;
 use JMS\Payment\CoreBundle\Plugin\AbstractPlugin;
+use JMS\Payment\CoreBundle\Plugin\Exception\Action\VisitUrl;
+use JMS\Payment\CoreBundle\Plugin\Exception\ActionRequiredException;
 use JMS\Payment\CoreBundle\Plugin\Exception\FinancialException;
+use JMS\Payment\CoreBundle\Plugin\Exception\PaymentPendingException;
 use JMS\Payment\CoreBundle\Plugin\PluginInterface;
+use JMS\Payment\CoreBundle\Util\Number;
 use Omnipay\Stripe\Gateway;
 use Psr\Log\LoggerInterface;
 
@@ -34,15 +39,24 @@ class ExpressCheckoutPlugin extends AbstractPlugin
         $this->logger = $logger;
     }
 
-    public function processes($name)
+    public function processes($paymentSystemName)
     {
-        return $name == 'stripe_express_checkout';
+        return $paymentSystemName === 'stripe_express_checkout';
+    }
+
+    public function approve(FinancialTransactionInterface $transaction, $retry)
+    {
+        $this->createCheckoutBillingAgreement($transaction, $retry);
     }
 
     public function approveAndDeposit(FinancialTransactionInterface $transaction, $retry)
     {
-        $parameters = $this->getPurchaseParameters($transaction);
+        $this->createCheckoutBillingAgreement($transaction, $retry);
+    }
 
+    protected function createCheckoutBillingAgreement(FinancialTransactionInterface $transaction, $retry)
+    {
+        $parameters = $this->getPurchaseParameters($transaction);
         $response = $this->gateway->purchase($parameters)->send();
 
         if($response->isSuccessful()) {
@@ -56,7 +70,7 @@ class ExpressCheckoutPlugin extends AbstractPlugin
 
             return;
         }
-        
+
         $data = $response->getData();
         switch($data['error']['type']) {
             case "api_error":
@@ -102,27 +116,11 @@ class ExpressCheckoutPlugin extends AbstractPlugin
      */
     protected function getPurchaseParameters(FinancialTransactionInterface $transaction)
     {
-        /**
-         * @var \JMS\Payment\CoreBundle\Model\PaymentInterface $payment
-         */
-        $payment = $transaction->getPayment();
-
-        /**
-         * @var \JMS\Payment\CoreBundle\Model\PaymentInstructionInterface $paymentInstruction
-         */
-        $paymentInstruction = $payment->getPaymentInstruction();
-
-        /**
-         * @var \JMS\Payment\CoreBundle\Model\ExtendedDataInterface $data
-         */
         $data = $transaction->getExtendedData();
 
-        $transaction->setTrackingId($payment->getId());
-
         $parameters = [
-            'amount'      => $payment->getTargetAmount(),
-            'currency'    => $paymentInstruction->getCurrency(),
-            'description' => $data->get('description'),
+            'amount'      => $transaction->getRequestedAmount(),
+            'currency'    => $transaction->getPayment()->getPaymentInstruction()->getCurrency(),
             'token'       => $data->get('token'),
         ];
 

@@ -18,7 +18,7 @@
             <argument>null</argument>
             <argument type="service" id="request" on-invalid="null" />
             <call method="setApiKey">
-                <argument>%payment.stripe.api_key%</argument>
+                <argument>%payment.stripe.express_checkout.api_key%</argument>
             </call>
         </service>
         <service id="payment.plugin.stripe_express_checkout" alias="JMS\Payment\StripeBundle\Plugin\ExpressCheckoutPlugin"/>

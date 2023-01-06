@@ -17,12 +17,17 @@ class JMSPaymentStripeController extends BaseController
     public function requestPaymentmethods(array $payment): Response
     {
         return $this->render(
-            __DIR__ . '/../Resources/Rendering/stripe_payment_interface.html.twig',
+            '@ibexadesign/checkout/partials/formpartials/fields/stripe_payment_interface.html.twig',
             [
                 $payment,
                 $this->gateway,
                 $this->apiKey
             ],
         );
+    }
+
+    public function setApiKey($value)
+    {
+        $this->apiKey = $value;
     }
 }

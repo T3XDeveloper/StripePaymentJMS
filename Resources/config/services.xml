@@ -36,6 +36,9 @@
             <call method="setContainer">
                 <argument type="service" id="service_container"/>
             </call>
+            <call method="setApiKey">
+                <argument>%payment.stripe.express_checkout.api_key%</argument>
+            </call>
             <argument type="service" id="payment.stripe.gateway" />
             <argument>%payment.stripe.express_checkout.api_key%</argument>
         </service>

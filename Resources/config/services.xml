@@ -31,5 +31,9 @@
         <service id="monolog.logger.stripe_express_checkout" parent="monolog.logger_prototype">
             <argument index="0">stripe_express_checkout</argument>
         </service>
+        <service id="payment.form.stripe_express_checkout_type" class="%payment.form.stripe_express_checkout_type.class%">
+            <tag name="payment.method_form_type" />
+            <tag name="form.type" alias="stripe_express_checkout" />
+        </service>
     </services>
 </container>

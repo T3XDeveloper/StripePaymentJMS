@@ -15,21 +15,11 @@ class JMSPaymentStripeController extends BaseController
 
     public function requestPaymentmethods(array $payment): Response
     {
-        $stripe = new \Stripe\StripeClient($this->secretKey);
-        $intent = $stripe->paymentIntents->create(
-            [
-                'amount' => 1099,
-                'currency' => 'usd',
-                'automatic_payment_methods' => ['enabled' => true],
-            ]
-        );
-
         return $this->render(
             '@ibexadesign/checkout/partials/formpartials/fields/stripe_payment_interface.html.twig',
             [
-                $payment,
-                $intent,
-                $this->apiKey
+                'payment' => $payment,
+                'publicKey' => $this->apiKey
             ],
         );
     }

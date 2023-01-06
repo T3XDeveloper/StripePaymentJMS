@@ -20,9 +20,15 @@ class ExpressCheckoutPlugin extends AbstractPlugin
      */
     protected $gateway;
 
-    public function __construct(Gateway $gateway)
+    public function __construct(
+        Gateway $gateway, 
+        $apiKey, 
+        $secretKey
+    )
     {
         $this->gateway = $gateway;
+        $this->apiKey = $apiKey;
+        $this->secretKey = $secretKey;
     }
 
     public function approve(FinancialTransactionInterface $transaction, $retry)
@@ -78,6 +84,34 @@ class ExpressCheckoutPlugin extends AbstractPlugin
     protected function createCheckoutBillingAgreement(FinancialTransactionInterface $transaction, $paymentAction)
     {
         $data = $transaction->getExtendedData();
-        die(var_dump($data));
+        
+        $stripe = new \Stripe\StripeClient($this->secretKey);
+        $intent = $stripe->checkout->sessions->create([
+            'success_url' => 'https://example.com/success',
+            'cancel_url' => 'https://example.com/cancel',
+            'line_items' => [
+                [
+                    'price' => 'price_H5ggYwtDq4fbrJ',
+                    'quantity' => 2,
+                ],
+            ],
+            'mode' => 'payment',
+        ]);
+
+        die(var_dump([
+            $data,
+            $intent
+        ]));
+    }
+
+
+    public function setApiKey($value)
+    {
+        $this->apiKey = $value;
+    }
+
+    public function setSecretKey($value)
+    {
+        $this->secretKey = $value;
     }
 }

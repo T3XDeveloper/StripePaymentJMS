@@ -25,8 +25,15 @@
         </service>
         <service id="payment.plugin.stripe_express_checkout" alias="JMS\Payment\StripeBundle\Plugin\ExpressCheckoutPlugin"/>
         <service id="JMS\Payment\StripeBundle\Plugin\ExpressCheckoutPlugin" class="%payment.plugin.stripe_express_checkout.class%">
+            <call method="setApiKey">
+                <argument>%payment.stripe.api_key%</argument>
+            </call>
+            <call method="setSecretKey">
+                <argument>%payment.stripe.secret_key%</argument>
+            </call>
             <argument type="service" id="payment.stripe.gateway" />
             <argument>%payment.stripe.api_key%</argument>
+            <argument>%payment.stripe.secret_key%</argument>
             <tag name="payment.plugin" />
         </service>
         <service id="payment.form.stripe_express_checkout_type" class="%payment.form.stripe_express_checkout_type.class%">

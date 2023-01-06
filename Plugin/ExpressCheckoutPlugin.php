@@ -9,7 +9,7 @@ use JMS\Payment\CoreBundle\Plugin\PluginInterface;
 use Omnipay\Stripe\Gateway;
 use Psr\Log\LoggerInterface;
 
-class CheckoutPlugin extends AbstractPlugin
+class ExpressCheckoutPlugin extends AbstractPlugin
 {
     /**
      * @var \Omnipay\Stripe\Gateway
@@ -45,11 +45,6 @@ class CheckoutPlugin extends AbstractPlugin
 
         $response = $this->gateway->purchase($parameters)->send();
 
-        if($this->logger) {
-            $this->logger->info(json_encode($response->getRequest()->getData()));
-            $this->logger->info(json_encode($response->getData()));
-        }
-
         if($response->isSuccessful()) {
             $transaction->setReferenceNumber($response->getTransactionReference());
 
@@ -59,24 +54,9 @@ class CheckoutPlugin extends AbstractPlugin
             $transaction->setResponseCode(PluginInterface::RESPONSE_CODE_SUCCESS);
             $transaction->setReasonCode(PluginInterface::REASON_CODE_SUCCESS);
 
-            if($this->logger) {
-                $this->logger->info(sprintf(
-                    'Payment is successful for transaction "%s".',
-                    $response->getTransactionReference()
-                ));
-            }
-
             return;
         }
-
-        if($this->logger) {
-            $this->logger->info(sprintf(
-                'Payment failed for transaction "%s" with message: %s.',
-                $response->getTransactionReference(),
-                $response->getMessage()
-            ));
-        }
-
+        
         $data = $response->getData();
         switch($data['error']['type']) {
             case "api_error":

@@ -84,23 +84,8 @@ class ExpressCheckoutPlugin extends AbstractPlugin
     protected function createCheckoutBillingAgreement(FinancialTransactionInterface $transaction, $paymentAction)
     {
         $data = $transaction->getExtendedData();
-        
-        $stripe = new \Stripe\StripeClient($this->secretKey);
-        $intent = $stripe->checkout->sessions->create([
-            'success_url' => 'https://example.com/success',
-            'cancel_url' => 'https://example.com/cancel',
-            'line_items' => [
-                [
-                    'price' => 'price_H5ggYwtDq4fbrJ',
-                    'quantity' => 2,
-                ],
-            ],
-            'mode' => 'payment',
-        ]);
-
         die(var_dump([
-            $data,
-            $intent
+            $data
         ]));
     }
 

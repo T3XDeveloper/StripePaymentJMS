@@ -5,12 +5,12 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-        <parameter key="payment.plugin.stripe_express_checkout.class">OMX\Ecommerce\StripePackage\Plugin\CheckoutPlugin</parameter>
+        <parameter key="payment.plugin.stripe_express_checkout.class">JMS\Payment\StripeBundle\Plugin\CheckoutPlugin</parameter>
         <parameter key="payment.stripe.api_key" />
 
         <parameter key="payment.stripe.gateway.class">Omnipay\Stripe\Gateway</parameter>
-        <parameter key="payment.form.stripe_express_stripe_type.class">OMX\Ecommerce\StripePackage\Form\StripeType</parameter>
-        <parameter key="payment.form.stripe_express_checkout_type.class">OMX\Ecommerce\StripePackage\Form\CheckoutType</parameter>
+        <parameter key="payment.form.stripe_express_stripe_type.class">JMS\Payment\StripeBundle\Form\StripeType</parameter>
+        <parameter key="payment.form.stripe_express_checkout_type.class">JMS\Payment\StripeBundle\Form\CheckoutType</parameter>
     </parameters>
 
     <services>

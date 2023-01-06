@@ -6,7 +6,7 @@
 
     <parameters>
         <parameter key="payment.plugin.stripe_express_checkout.class">JMS\Payment\StripeBundle\Plugin\ExpressCheckoutPlugin</parameter>
-        <parameter key="payment.stripe.express_checkout.api_key" />
+        <parameter key="payment.stripe.api_key" />
 
         <parameter key="payment.stripe.gateway.class">Omnipay\Stripe\Gateway</parameter>
         <parameter key="payment.stripe.controller.class">JMS\Payment\StripeBundle\Controller\JMSPaymentStripeController</parameter>
@@ -19,13 +19,13 @@
             <argument>null</argument>
             <argument type="service" id="request" on-invalid="null" />
             <call method="setApiKey">
-                <argument>%payment.stripe.express_checkout.api_key%</argument>
+                <argument>%payment.stripe.api_key%</argument>
             </call>
         </service>
         <service id="payment.plugin.stripe_express_checkout" alias="JMS\Payment\StripeBundle\Plugin\ExpressCheckoutPlugin"/>
         <service id="JMS\Payment\StripeBundle\Plugin\ExpressCheckoutPlugin" class="%payment.plugin.stripe_express_checkout.class%">
             <argument type="service" id="payment.stripe.gateway" />
-            <argument>%payment.stripe.express_checkout.api_key%</argument>
+            <argument>%payment.stripe.api_key%</argument>
             <tag name="payment.plugin" />
         </service>
         <service id="payment.form.stripe_express_checkout_type" class="%payment.form.stripe_express_checkout_type.class%">
@@ -37,10 +37,10 @@
                 <argument type="service" id="service_container"/>
             </call>
             <call method="setApiKey">
-                <argument>%payment.stripe.express_checkout.api_key%</argument>
+                <argument>%payment.stripe.api_key%</argument>
             </call>
             <argument type="service" id="payment.stripe.gateway" />
-            <argument>%payment.stripe.express_checkout.api_key%</argument>
+            <argument>%payment.stripe.api_key%</argument>
         </service>
     </services>
 </container>

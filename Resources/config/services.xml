@@ -21,7 +21,7 @@
                 <argument>%payment.stripe.api_key%</argument>
             </call>
         </service>
-        <service id="payment.plugin.stripe_express_checkout" class="%payment.plugin.stripe_express_checkout%">
+        <service id="payment.plugin.stripe_express_checkout" class="%payment.plugin.stripe_express_checkout.class%">
             <argument type="service" id="payment.stripe.gateway" />
             <call method="setLogger">
                 <argument type="service" id="monolog.logger.stripe_express_checkout" />

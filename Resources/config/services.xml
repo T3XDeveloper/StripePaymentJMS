@@ -9,6 +9,7 @@
         <parameter key="payment.stripe.express_checkout.api_key" />
 
         <parameter key="payment.stripe.gateway.class">Omnipay\Stripe\Gateway</parameter>
+        <parameter key="payment.stripe.controller.class">JMS\Payment\StripeBundle\Controller\JMSPaymentStripeController</parameter>
         <parameter key="payment.form.stripe_express_stripe_type.class">JMS\Payment\StripeBundle\Form\ExpressStripeType</parameter>
         <parameter key="payment.form.stripe_express_checkout_type.class">JMS\Payment\StripeBundle\Form\ExpressCheckoutType</parameter>
     </parameters>
@@ -30,6 +31,10 @@
         <service id="payment.form.stripe_express_checkout_type" class="%payment.form.stripe_express_checkout_type.class%">
             <tag name="payment.method_form_type" />
             <tag name="form.type" alias="stripe_express_checkout" />
+        </service>
+        <service id="payment.stripe.controller" class="%payment.stripe.controller.class%">
+            <argument type="service" id="payment.stripe.gateway" />
+            <argument>%payment.stripe.express_checkout.api_key%</argument>
         </service>
     </services>
 </container>

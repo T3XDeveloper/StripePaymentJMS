@@ -25,6 +25,7 @@ class Configuration implements ConfigurationInterface
             ->getRootNode()
                 ->children()
                     ->scalarNode('api_key')->defaultNull()->end()
+                    ->scalarNode('secret_key')->defaultNull()->end()
                     ->arrayNode('methods')
                         ->scalarPrototype()->end()
                     ->end()

@@ -4,23 +4,31 @@ namespace JMS\Payment\StripeBundle\Controller;
 
 use Ibexa\Bundle\Core\Controller as BaseController;
 use Symfony\Component\HttpFoundation\Response;
-use Omnipay\Stripe\Gateway;
 
 class JMSPaymentStripeController extends BaseController
 {
-    public function __construct(Gateway $gateway, $apiKey)
+    public function __construct($apiKey, $secretKey)
     {
-        $this->gateway = $gateway;
         $this->apiKey = $apiKey;
+        $this->secretKey = $secretKey;
     }
 
     public function requestPaymentmethods(array $payment): Response
     {
+        $stripe = new \Stripe\StripeClient($this->secretKey);
+        $intent = $stripe->paymentIntents->create(
+            [
+                'amount' => 1099,
+                'currency' => 'usd',
+                'automatic_payment_methods' => ['enabled' => true],
+            ]
+        );
+
         return $this->render(
             '@ibexadesign/checkout/partials/formpartials/fields/stripe_payment_interface.html.twig',
             [
                 $payment,
-                $this->gateway,
+                $intent,
                 $this->apiKey
             ],
         );
@@ -29,5 +37,10 @@ class JMSPaymentStripeController extends BaseController
     public function setApiKey($value)
     {
         $this->apiKey = $value;
+    }
+
+    public function setSecretKey($value)
+    {
+        $this->secretKey = $value;
     }
 }

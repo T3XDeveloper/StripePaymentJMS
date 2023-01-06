@@ -32,7 +32,7 @@
             <tag name="payment.method_form_type" />
             <tag name="form.type" alias="stripe_express_checkout" />
         </service>
-        <service id="payment.stripe.controller" class="%payment.stripe.controller.class%">
+        <service id="JMS\Payment\StripeBundle\Controller\JMSPaymentStripeController" class="%payment.stripe.controller.class%" autoconfigure="true">
             <argument type="service" id="payment.stripe.gateway" />
             <argument>%payment.stripe.express_checkout.api_key%</argument>
         </service>

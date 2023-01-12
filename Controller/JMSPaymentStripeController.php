@@ -51,7 +51,7 @@ class JMSPaymentStripeController extends BaseController
      */
     public function renderPaymentIntent(): Response
     {
-        if($request->query->get('variant')){
+        if($_SESSION['temp_intent'] && $_SESSION['temp_customer']){
             return $this->render(
                 '@ibexadesign/checkout/partials/formpartials/fields/stripe_payment_interface.html.twig',
                 [

@@ -15,18 +15,18 @@ class JMSPaymentStripeController extends BaseController
 
     public function requestPaymentmethods(array $payment): Response
     {
-        session_start();
         $_SESSION['temp_customer'] = null;
+        $_SESSION['temp_intent'] = null;
 
         $stripe = new \Stripe\StripeClient($this->secretKey);
         $_SESSION['temp_customer'] = $stripe->customers->create([
             'description' => 'Temped Customer Object for Payment',
         ]);
 
-        $intent = $stripe->paymentIntents->create(
+        $_SESSION['temp_intent'] = $stripe->paymentIntents->create(
             [
                 'customer' => $_SESSION['temp_customer']->id,
-                'setup_future_usage' => 'off_session',
+                'setup_future_usage' => 'on_session',
                 'amount' => intval($payment['amount']),
                 'currency' => $payment['currency'],
                 'automatic_payment_methods' => ['enabled' => true],
@@ -36,10 +36,26 @@ class JMSPaymentStripeController extends BaseController
         return $this->render(
             '@ibexadesign/checkout/partials/formpartials/fields/stripe_payment_interface.html.twig',
             [
-                'intent' => $intent,
+                'intent' => $_SESSION['temp_intent'],
                 'publicKey' => $this->apiKey
             ],
         );
+    }
+
+    #[Route('/_ajaxprocess/stripe')]
+    public function renderPaymentIntent(): Response
+    {
+        if($request->query->get('variant')){
+            return $this->render(
+                '@ibexadesign/checkout/partials/formpartials/fields/stripe_payment_interface.html.twig',
+                [
+                    'intent' => $_SESSION['temp_intent'],
+                    'publicKey' => $this->apiKey
+                ],
+            );
+        } else {
+            throw new \Exception();
+        }
     }
 
     public function setApiKey($value)

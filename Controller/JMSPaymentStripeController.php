@@ -5,6 +5,9 @@ namespace JMS\Payment\StripeBundle\Controller;
 use Ibexa\Bundle\Core\Controller as BaseController;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @Route("/")
+ */
 class JMSPaymentStripeController extends BaseController
 {
     public function __construct($apiKey, $secretKey)
@@ -42,7 +45,9 @@ class JMSPaymentStripeController extends BaseController
         );
     }
 
-    #[Route('/_ajaxprocess/stripe')]
+    /**
+     * @Route("/_ajaxprocess/stripe", name="payment_add")
+     */
     public function renderPaymentIntent(): Response
     {
         if($request->query->get('variant')){

@@ -34,7 +34,7 @@ class JMSPaymentStripeController extends BaseController
         );
 
         return $this->render(
-            '@ibexadesign/checkout/partials/formpartials/fields/stripe_payment_interface.html.twig',
+            '@ibexadesign/checkout/partials/formpartials/fields/stripe_payment_methods.html.twig',
             [
                 'intent' => $_SESSION['temp_intent'],
                 'publicKey' => $this->apiKey

@@ -40,37 +40,7 @@ class ExpressCheckoutPlugin extends AbstractPlugin
     {
         $this->createCheckoutBillingAgreement($transaction, 'Sale');
     }
-
-    public function credit(FinancialTransactionInterface $transaction, $retry)
-    {
-        $data = $transaction->getExtendedData();
-        $approveTransaction = $transaction->getCredit()->getPayment()->getApproveTransaction();
-
-        $parameters = [];
-        if (Number::compare($transaction->getRequestedAmount(), $approveTransaction->getProcessedAmount()) !== 0) {
-            $parameters['REFUNDTYPE'] = 'Partial';
-            $parameters['AMT'] = $this->client->convertAmountToPaypalFormat($transaction->getRequestedAmount());
-            $parameters['CURRENCYCODE'] = $transaction->getCredit()->getPaymentInstruction()->getCurrency();
-        }
-    }
-
-    public function deposit(FinancialTransactionInterface $transaction, $retry)
-    {
-        $data = $transaction->getExtendedData();
-        $authorizationId = $transaction->getPayment()->getApproveTransaction()->getReferenceNumber();
-
-        if (Number::compare($transaction->getPayment()->getApprovedAmount(), $transaction->getRequestedAmount()) === 0) {
-            $completeType = 'Complete';
-        } else {
-            $completeType = 'NotComplete';
-        }
-    }
-
-    public function reverseApproval(FinancialTransactionInterface $transaction, $retry)
-    {
-        $data = $transaction->getExtendedData();
-    }
-
+    
     public function processes($paymentSystemName)
     {
         return 'stripe_express_checkout' === $paymentSystemName;
@@ -83,10 +53,10 @@ class ExpressCheckoutPlugin extends AbstractPlugin
 
     protected function createCheckoutBillingAgreement(FinancialTransactionInterface $transaction, $paymentAction)
     {
-        $data = $transaction->getExtendedData();
-        die(var_dump([
-            $data
-        ]));
+        $transaction->setReferenceNumber($_SESSION['temp_intent']->id);
+        $transaction->setProcessedAmount($_SESSION['temp_intent']->amount);
+        $transaction->setResponseCode(PluginInterface::RESPONSE_CODE_SUCCESS);
+        $transaction->setReasonCode(PluginInterface::REASON_CODE_SUCCESS);
     }
 
 

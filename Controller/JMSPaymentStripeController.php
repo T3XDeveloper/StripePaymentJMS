@@ -43,7 +43,7 @@ class JMSPaymentStripeController extends BaseController
             [
                 'customer' => $_SESSION['temp_customer']->id,
                 'setup_future_usage' => 'on_session',
-                'amount' => $payment['amount'] * 100,
+                'amount' => round($payment['amount'], 2) * 100,
                 'currency' => $payment['currency'],
                 'automatic_payment_methods' => ['enabled' => true],
             ]

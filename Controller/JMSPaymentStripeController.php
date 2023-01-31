@@ -55,7 +55,6 @@ class JMSPaymentStripeController extends BaseController
                 'automatic_payment_methods' => ['enabled' => true],
             ]
         );
-        dump($_SESSION['temp_intent']);
 
         return $this->render(
             '@ibexadesign/checkout/partials/formpartials/fields/stripe_payment_methods.html.twig',

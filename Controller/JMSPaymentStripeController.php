@@ -5,22 +5,29 @@ namespace JMS\Payment\StripeBundle\Controller;
 use Ibexa\Bundle\Core\Controller as BaseController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Ibexa\Bundle\Commerce\Checkout\Entity\BasketRepository;
 
 /**
  * @Route("/")
  */
 class JMSPaymentStripeController extends BaseController
 {
-    public function __construct($apiKey, $secretKey)
+    public function __construct(
+        $apiKey,
+        $secretKey,
+        $basketRepository
+    )
     {
         $this->apiKey = $apiKey;
         $this->secretKey = $secretKey;
+        $this->basketRepository = $basketRepository;
     }
 
     public function requestPaymentmethods(array $payment): Response
     {
         $_SESSION['temp_customer'] = null;
         $_SESSION['temp_intent'] = null;
+        $_SESSION['temp_payment'] = $payment;
 
         $basketID = $payment['basketId'];
         $basketSessionID = $payment['basketSessionId'];
@@ -64,6 +71,15 @@ class JMSPaymentStripeController extends BaseController
     public function renderPaymentIntent(): Response
     {
         if($_SESSION['temp_intent'] && $_SESSION['temp_customer']){
+            $basketRepository = $this->get(\Ibexa\Bundle\Commerce\Checkout\Entity\BasketRepository::class);
+            $basket = $basketRepository->getBasketByBasketIdAndSessionId($_SESSION['temp_payment']['basketId'], $_SESSION['temp_payment']['basketSessionId']);
+
+            $stripe = new \Stripe\StripeClient($this->secretKey);
+            $_SESSION['temp_intent'] = $stripe->paymentIntents->update(
+                $_SESSION['temp_intent']->id,
+                ['amount' => round($basket->getTotalsSumGross(), 2) * 100]
+            );
+
             return $this->render(
                 '@ibexadesign/checkout/partials/formpartials/fields/stripe_payment_interface.html.twig',
                 [
@@ -84,5 +100,10 @@ class JMSPaymentStripeController extends BaseController
     public function setSecretKey($value)
     {
         $this->secretKey = $value;
+    }
+
+    public function setBasketRespository($value)
+    {
+        $this->basketRespository = $value;
     }
 }

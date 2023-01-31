@@ -8,6 +8,7 @@
         <parameter key="payment.plugin.stripe_express_checkout.class">JMS\Payment\StripeBundle\Plugin\ExpressCheckoutPlugin</parameter>
         <parameter key="payment.stripe.api_key" />
         <parameter key="payment.stripe.secret_key" />
+        <parameter key="payment.stripe.basket_repository">Ibexa\Bundle\Commerce\Checkout\Entity\BasketRepository</parameter>
 
         <parameter key="payment.stripe.gateway.class">Omnipay\Stripe\Gateway</parameter>
         <parameter key="payment.stripe.controller.class">JMS\Payment\StripeBundle\Controller\JMSPaymentStripeController</parameter>
@@ -50,9 +51,12 @@
             <call method="setSecretKey">
                 <argument>%payment.stripe.secret_key%</argument>
             </call>
-            <argument type="service" id="payment.stripe.gateway" />
+            <call method="setBasketRespository">
+                <argument>%payment.stripe.basket_repository%</argument>
+            </call>
             <argument>%payment.stripe.api_key%</argument>
             <argument>%payment.stripe.secret_key%</argument>
+            <argument>%payment.stripe.basket_repository%</argument>
         </service>
     </services>
 </container>

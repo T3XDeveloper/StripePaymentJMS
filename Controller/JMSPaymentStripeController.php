@@ -52,8 +52,7 @@ class JMSPaymentStripeController extends BaseController
                 'setup_future_usage' => 'on_session',
                 'amount' => round($payment['amount'], 2) * 100,
                 'currency' => $payment['currency'],
-                'automatic_payment_methods' => ['enabled' => false],
-                'payment_method_types' => ['card', 'klarna']
+                'automatic_payment_methods' => ['enabled' => true],
             ]
         );
 

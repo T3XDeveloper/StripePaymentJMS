@@ -46,21 +46,26 @@ class JMSPaymentStripeController extends BaseController
             ]);
         }
 
+        $intentOptions = [
+            'customer' => $_SESSION['temp_customer']->id,
+            'amount' => round($payment['amount'], 2) * 100,
+            'currency' => $payment['currency'],
+            'automatic_payment_methods' => ['enabled' => true],
+        ];
+        if(!empty($payment['userEmail'])){
+            $intentOptions['receipt_email'] = $payment['userEmail'];
+        }
+        if(!empty($payment['userName']) && !empty($payment['userCountry'])){
+            $intentOptions['shipping'] = [
+                'name' => $payment['userName'],
+                'address' => [
+                    'country' => $payment['userCountry']
+                ]
+            ];
+        }
+
         $_SESSION['temp_intent'] = $stripe->paymentIntents->create(
-            [
-                'customer' => $_SESSION['temp_customer']->id,
-                'setup_future_usage' => 'on_session',
-                'amount' => round($payment['amount'], 2) * 100,
-                'currency' => $payment['currency'],
-                'shipping' => [
-                    'name' => $payment['userName'],
-                    'address' => [
-                        'country' => $payment['userCountry']
-                    ]
-                ],
-                'receipt_email' => $payment['userEmail'],
-                'automatic_payment_methods' => ['enabled' => true],
-            ]
+            $intentOptions
         );
 
         return $this->render(

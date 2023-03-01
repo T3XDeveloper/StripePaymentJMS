@@ -52,7 +52,7 @@ class JMSPaymentStripeController extends BaseController
             'currency' => $payment['currency'],
             'automatic_payment_methods' => ['enabled' => true],
         ];
-        if(!empty($payment['userEmail'])){
+        if(filter_var($payment['userEmail'], FILTER_VALIDATE_EMAIL)){
             $intentOptions['receipt_email'] = $payment['userEmail'];
         }
         if(!empty($payment['userName']) && !empty($payment['userCountry'])){

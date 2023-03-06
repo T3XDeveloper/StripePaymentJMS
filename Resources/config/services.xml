@@ -56,7 +56,7 @@
                 <argument>%payment.stripe.basket_repository%</argument>
             </call>
             <call method="setEntityManager">
-                <argument>%payment.stripe.entity_manager%%</argument>
+                <argument>%payment.stripe.entity_manager%</argument>
             </call>
             <argument>%payment.stripe.api_key%</argument>
             <argument>%payment.stripe.secret_key%</argument>

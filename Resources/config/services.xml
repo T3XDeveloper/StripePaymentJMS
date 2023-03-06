@@ -61,7 +61,7 @@
             <argument>%payment.stripe.api_key%</argument>
             <argument>%payment.stripe.secret_key%</argument>
             <argument>%payment.stripe.basket_repository%</argument>
-            <argument>%payment.stripe.entity_manager%%</argument>
+            <argument>%payment.stripe.entity_manager%</argument>
         </service>
     </services>
 </container>

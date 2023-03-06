@@ -2,10 +2,25 @@
 
 namespace JMS\Payment\StripeBundle\Controller;
 
+use Doctrine\ORM\EntityManagerInterface;
+use Ibexa\Bundle\Commerce\Checkout\Entity\Basket;
+use Ibexa\Bundle\Commerce\Eshop\Controller\AjaxController;
+use Ibexa\Bundle\Commerce\Eshop\Exceptions\MaximumOrdersFailedException;
+use Ibexa\Bundle\Commerce\Eshop\Services\WebConnectorErpService;
+use Ibexa\Bundle\Commerce\Payment\Api\StandardPaymentService;
+use Ibexa\Bundle\Commerce\Payment\Exception\MaxAmountExceededException;
+use Ibexa\Bundle\Commerce\Payment\Exception\RedirectionRequiredException;
+use Ibexa\Bundle\Commerce\Translation\Services\TransService;
 use Ibexa\Bundle\Core\Controller as BaseController;
+use Ibexa\Commerce\Checkout\Model\CheckoutSources;
+use Ibexa\Commerce\Checkout\Service\BasketGuidService;
+use Ibexa\Commerce\Checkout\Service\BasketService;
+use JMS\Payment\CoreBundle\BrowserKit\Request;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Ibexa\Bundle\Commerce\Checkout\Entity\BasketRepository;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * @Route("/")
@@ -15,16 +30,19 @@ class JMSPaymentStripeController extends BaseController
     public function __construct(
         $apiKey,
         $secretKey,
-        $basketRepository
+        $basketRepository,
+        $entityManager
     )
     {
         $this->apiKey = $apiKey;
         $this->secretKey = $secretKey;
         $this->basketRepository = $basketRepository;
+        $this->entityManager = $entityManager;
     }
 
     public function requestPaymentmethods(array $payment): Response
     {
+        $redirectUrl = '';
         $_SESSION['temp_customer'] = null;
         $_SESSION['temp_intent'] = null;
         $_SESSION['temp_payment'] = $payment;
@@ -36,6 +54,32 @@ class JMSPaymentStripeController extends BaseController
         $existCustomer = $stripe->customers->search([
             'query' => 'name:\''.$basketID.'&'.$basketSessionID.'\'',
         ]);
+
+        if(isset($_GET['payment_intent']) && isset($_GET['payment_intent_client_secret']) && isset($_GET['redirect_status'])){
+            $intent = $_GET['payment_intent'];
+            $secret = $_GET['payment_intent_client_secret'];
+            $status = $_GET['redirect_status'];
+
+            $intentResponse = $stripe->paymentIntents->retrieve(
+                $intent,
+                []
+            );
+
+            if($intentResponse->client_secret == $secret && $intentResponse->status == $status){
+                $basketRepository = $this->get(\Ibexa\Bundle\Commerce\Checkout\Entity\BasketRepository::class);
+                $basket = $basketRepository->getBasketByBasketIdAndSessionId($basketID, $basketSessionID);
+
+                $redirectUrl = $this->generateUrl(
+                    'ibexa.commerce.checkout.confirmation',
+                    ['basketId' => $basket->getBasketId()],
+                    UrlGeneratorInterface::ABSOLUTE_URL
+                );
+
+                $this->renderConfirmedOrder($basket);
+            } else {
+                throw new \Exception();
+            }
+        }
 
         if(!empty($existCustomer->data[0])){
             $_SESSION['temp_customer'] = $existCustomer->data[0];
@@ -72,7 +116,8 @@ class JMSPaymentStripeController extends BaseController
             '@ibexadesign/checkout/partials/formpartials/fields/stripe_payment_methods.html.twig',
             [
                 'intent' => $_SESSION['temp_intent'],
-                'publicKey' => $this->apiKey
+                'publicKey' => $this->apiKey,
+                'confirmation' => $redirectUrl
             ],
         );
     }
@@ -117,5 +162,81 @@ class JMSPaymentStripeController extends BaseController
     public function setBasketRespository($value)
     {
         $this->basketRespository = $value;
+    }
+
+    public function setEntityManager($value)
+    {
+        $this->entityManager = $value;
+    }
+
+    public function renderConfirmedOrder($basket)
+    {
+        $basketService = $this->get(\Ibexa\Commerce\Checkout\Service\BasketService::class);
+        $order = $basketService->getOrder($basket->getBasketId());
+
+        if (!$order instanceof Basket) {
+            $basket->addToDataMap('', 'locale');
+            $copiedBasket = $basketService->copyBasket($basket);
+
+            // process payment
+            /** @var \Ibexa\Bundle\Commerce\Payment\Api\PaymentServiceInterface $paymentService */
+            $paymentService = $this->get(StandardPaymentService::class);
+            /** @var \Ibexa\Commerce\Checkout\Service\BasketGuidService $guidService */
+            $guidService = $this->get(BasketGuidService::class);
+
+            try {
+                $copiedBasket->setGuid($guidService->createGuid($basket));
+                $copiedBasket->setState(BasketService::STATE_OFFERED);
+                $amount = $copiedBasket->getTotalsSum()->getTotalGross();
+                if ($amount) {
+                    $amount = round($amount, 2);
+                    $copiedBasket->getTotalsSum()->setTotalGross($amount);
+                }
+                $this->entityManager->persist($copiedBasket);
+                $this->entityManager->flush();
+                $paymentService->processPayment(
+                    $copiedBasket->getBasketId(),
+                    $copiedBasket->getPaymentMethod(),
+                    $amount,
+                    $copiedBasket->getTotalsSum()->getCurrency()
+                );
+                $copiedBasket->setState(BasketService::STATE_PAYED);
+                /** @var \Ibexa\Bundle\Commerce\Eshop\Services\AbstractErpService $erpService */
+                $erpService = $this->get(WebConnectorErpService::class);
+                /** @var \Ibexa\Bundle\Commerce\Eshop\Entities\Messages\Document\OrderResponse $orderResponse */
+                $orderResponse = $erpService->submitOrder($copiedBasket);
+                if ($orderResponse !== null) {
+                    $copiedBasket->setErpOrderId($orderResponse->SalesOrderID->value);
+                    $copiedBasket->setState(BasketService::STATE_CONFIRMED);
+                    $this->entityManager->persist($copiedBasket);
+                    $this->entityManager->flush();
+                }
+            } catch (MaximumOrdersFailedException $ex) {
+                /** @var \Monolog\Logger $logging */
+                $logging = $this->getLogger();
+                $logging->error($ex->getMessage());
+            } catch (RedirectionRequiredException $ex) {
+                $redirectUrl = $ex->getUrl();
+                $copiedBasket->setState(BasketService::STATE_OFFERED);
+            } catch (MaxAmountExceededException $ex) {
+                $redirectUrl = null;
+                $status = AjaxController::STATUS_ERROR;
+                // TODO customized message for payment error
+                $translator = $this->get(TransService::class);
+                $transParams = [
+                    '%maxAmount%' => $ex->getMaxAmount(),
+                ];
+                $errorMsg = $translator->translate(
+                /** @Desc("Your order exceeded the maximum allowed amount of %maxAmount%. Please contact our customer support!") */
+                    'msg.max_amount_payment_error',
+                    null,
+                    $transParams
+                );
+                $message = ['message' => $errorMsg, 'type' => $status];
+                $copiedBasket->setState(BasketService::STATE_OFFERED);
+            }
+            $this->entityManager->persist($copiedBasket);
+            $this->entityManager->flush();
+        }
     }
 }

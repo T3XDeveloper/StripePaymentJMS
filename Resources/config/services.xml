@@ -9,6 +9,7 @@
         <parameter key="payment.stripe.api_key" />
         <parameter key="payment.stripe.secret_key" />
         <parameter key="payment.stripe.basket_repository">Ibexa\Bundle\Commerce\Checkout\Entity\BasketRepository</parameter>
+        <parameter key="payment.stripe.entity_manager">Doctrine\ORM\EntityManagerInterface</parameter>
 
         <parameter key="payment.stripe.gateway.class">Omnipay\Stripe\Gateway</parameter>
         <parameter key="payment.stripe.controller.class">JMS\Payment\StripeBundle\Controller\JMSPaymentStripeController</parameter>
@@ -54,9 +55,13 @@
             <call method="setBasketRespository">
                 <argument>%payment.stripe.basket_repository%</argument>
             </call>
+            <call method="setEntityManager">
+                <argument>%payment.stripe.entity_manager%%</argument>
+            </call>
             <argument>%payment.stripe.api_key%</argument>
             <argument>%payment.stripe.secret_key%</argument>
             <argument>%payment.stripe.basket_repository%</argument>
+            <argument>%payment.stripe.entity_manager%%</argument>
         </service>
     </services>
 </container>

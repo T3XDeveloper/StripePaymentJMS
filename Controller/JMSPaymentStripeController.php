@@ -30,14 +30,12 @@ class JMSPaymentStripeController extends BaseController
     public function __construct(
         $apiKey,
         $secretKey,
-        $basketRepository,
-        $entityManager
+        $basketRepository
     )
     {
         $this->apiKey = $apiKey;
         $this->secretKey = $secretKey;
         $this->basketRepository = $basketRepository;
-        $this->entityManager = $entityManager;
     }
 
     public function requestPaymentmethods(array $payment): Response

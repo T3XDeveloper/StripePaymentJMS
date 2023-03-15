@@ -136,7 +136,7 @@ class JMSPaymentStripeController extends BaseController
     /**
      * @Route("/_ajaxprocess/stripe-confirmation", name="payment_confirm")
      */
-    public function confirmPaymentOrder()
+    public function confirmPaymentOrder(): Response
     {
         if($_SESSION['temp_intent'] && $_SESSION['temp_customer']){
             $basketRepository = $this->get(\Ibexa\Bundle\Commerce\Checkout\Entity\BasketRepository::class);
@@ -152,7 +152,7 @@ class JMSPaymentStripeController extends BaseController
                     ]
                 ]
             );
-            return true;
+            return new Response();
         } else {
             throw new \Exception();
         }

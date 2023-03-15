@@ -133,6 +133,31 @@ class JMSPaymentStripeController extends BaseController
         }
     }
 
+    /**
+     * @Route("/_ajaxprocess/stripe-confirmation", name="payment_confirm")
+     */
+    public function confirmPaymentOrder()
+    {
+        if($_SESSION['temp_intent'] && $_SESSION['temp_customer']){
+            $basketRepository = $this->get(\Ibexa\Bundle\Commerce\Checkout\Entity\BasketRepository::class);
+            $basket = $basketRepository->getBasketByBasketIdAndSessionId($_GET['basketId'], $_GET['sessionId']);
+
+            $stripe = new \Stripe\StripeClient($this->secretKey);
+            $_SESSION['temp_intent'] = $stripe->paymentIntents->update(
+                $_SESSION['temp_intent']->id,
+                [
+                    'description' => 'IBEXA Bestellnummer: '.$basket->getErpOrderId(),
+                    'metadata' => [
+                        'order_id' => $basket->getErpOrderId()
+                    ]
+                ]
+            );
+            return true;
+        } else {
+            throw new \Exception();
+        }
+    }
+
     public function setApiKey($value)
     {
         $this->apiKey = $value;
